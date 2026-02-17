@@ -1,0 +1,177 @@
+
+{% extends 'timesheet/base.html' %}
+
+{% block title %}Create Timesheet - Timesheet Manager{% endblock %}
+
+{% block content %}
+<form method="post" id="timesheetForm">
+    {% csrf_token %}
+    
+    <!-- Basic Info -->
+    <div class="card">
+        <h2 class="mb-4">Timesheet Information</h2>
+        <div class="grid grid-cols-3">
+            <div class="form-group">
+                <label>Cleaner Name</label>
+                {{ form.cleaner_name }}
+            </div>
+            <div class="form-group">
+                <label>Month</label>
+                {{ form.month }}  <!-- This will  show month names -->
+            </div>
+            <div class="form-group">
+                <label>Year</label>
+                {{ form.year }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Company Selection -->
+    <div class="card">
+        <h2 class="mb-4">Select Companies</h2>
+        <p class="text-gray mb-4">Click to select companies for this timesheet. Their scheduled hours will be automatically applied.</p>
+        
+        <div class="grid grid-cols-3" id="companyGrid">
+            {% for company in companies %}
+            <div class="company-card" onclick="toggleCompany(this, {{ company.id }})">
+                <input type="checkbox" name="companies" value="{{ company.id }}" style="display: none;">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 style="font-size: 16px; font-weight: 600;">{{ company.name }}</h3>
+                    <span class="pattern-badge pattern-{{ company.pattern_type }}">{{ company.get_pattern_type_display }}</span>
+                </div>
+                
+                <div class="hours-grid">
+                    <div class="hours-cell {% if company.mon_hours > 0 or company.mon_hours_week_a > 0 %}has-hours{% endif %}">
+                        <div class="day-label">Mon</div>
+                        <div class="hours-value">{% if company.pattern_type == 'weekly' %}{{ company.mon_hours|default:"0" }}{% else %}{{ company.mon_hours_week_a|default:"0" }}/{{ company.mon_hours_week_b|default:"0" }}{% endif %}</div>
+                    </div>
+                    <div class="hours-cell {% if company.tue_hours > 0 or company.tue_hours_week_a > 0 %}has-hours{% endif %}">
+                        <div class="day-label">Tue</div>
+                        <div class="hours-value">{% if company.pattern_type == 'weekly' %}{{ company.tue_hours|default:"0" }}{% else %}{{ company.tue_hours_week_a|default:"0" }}/{{ company.tue_hours_week_b|default:"0" }}{% endif %}</div>
+                    </div>
+                    <div class="hours-cell {% if company.wed_hours > 0 or company.wed_hours_week_a > 0 %}has-hours{% endif %}">
+                        <div class="day-label">Wed</div>
+                        <div class="hours-value">{% if company.pattern_type == 'weekly' %}{{ company.wed_hours|default:"0" }}{% else %}{{ company.wed_hours_week_a|default:"0" }}/{{ company.wed_hours_week_b|default:"0" }}{% endif %}</div>
+                    </div>
+                    <div class="hours-cell {% if company.thu_hours > 0 or company.thu_hours_week_a > 0 %}has-hours{% endif %}">
+                        <div class="day-label">Thu</div>
+                        <div class="hours-value">{% if company.pattern_type == 'weekly' %}{{ company.thu_hours|default:"0" }}{% else %}{{ company.thu_hours_week_a|default:"0" }}/{{ company.thu_hours_week_b|default:"0" }}{% endif %}</div>
+                    </div>
+                    <div class="hours-cell {% if company.fri_hours > 0 or company.fri_hours_week_a > 0 %}has-hours{% endif %}">
+                        <div class="day-label">Fri</div>
+                        <div class="hours-value">{% if company.pattern_type == 'weekly' %}{{ company.fri_hours|default:"0" }}{% else %}{{ company.fri_hours_week_a|default:"0" }}/{{ company.fri_hours_week_b|default:"0" }}{% endif %}</div>
+                    </div>
+                    <div class="hours-cell {% if company.sat_hours > 0 or company.sat_hours_week_a > 0 %}has-hours{% endif %}">
+                        <div class="day-label">Sat</div>
+                        <div class="hours-value">{% if company.pattern_type == 'weekly' %}{{ company.sat_hours|default:"0" }}{% else %}{{ company.sat_hours_week_a|default:"0" }}/{{ company.sat_hours_week_b|default:"0" }}{% endif %}</div>
+                    </div>
+                    <div class="hours-cell {% if company.sun_hours > 0 or company.sun_hours_week_a > 0 %}has-hours{% endif %}">
+                        <div class="day-label">Sun</div>
+                        <div class="hours-value">{% if company.pattern_type == 'weekly' %}{{ company.sun_hours|default:"0" }}{% else %}{{ company.sun_hours_week_a|default:"0" }}/{{ company.sun_hours_week_b|default:"0" }}{% endif %}</div>
+                    </div>
+                </div>
+                
+                {% if company.pattern_type == 'biweekly' and company.biweekly_start_date %}
+                <div style="margin-top: 8px; font-size: 11px; color: #6b7280;">
+                    Bi-weekly start: {{ company.biweekly_start_date }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div id="selectedCompanies" class="mt-4" style="display: none;">
+            <h4>Selected Companies:</h4>
+            <div id="selectedList" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;"></div>
+        </div>
+    </div>
+    
+    <!-- Extra Hours ( Optional) -->
+    <div class="card">
+        <div class="flex justify-between items-center mb-4">
+            <h2>Extra Hours (Optional)</h2>
+            <button type="button" class="btn btn-secondary" onclick="addExtraHours()">+ Add Extra Hours</button>
+        </div>
+        <p class="text-gray mb-4">Add one-time extra hours if needed. Leave empty if no extra hours for this month.</p>
+        
+        <div id="extraHoursContainer">
+            <!-- Extra hours rows will be added here -->
+        </div>
+    </div>
+    
+    <!-- Submit -->
+    <div class="card" style="display: flex; gap: 12px; justify-content: flex-end;">
+        <a href="{% url 'timesheet_list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Generate Timesheet</button>
+    </div>
+</form>
+
+<script>
+function toggleCompany(card, companyId) {
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    card.classList.toggle('selected', checkbox.checked);
+    updateSelectedList();
+}
+
+function updateSelectedList() {
+    const selected = document.querySelectorAll('.company-card.selected');
+    const container = document.getElementById('selectedCompanies');
+    const list = document.getElementById('selectedList');
+    
+    if (selected.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    list.innerHTML = '';
+    
+    selected.forEach(card => {
+        const name = card.querySelector('h3').textContent;
+        const badge = document.createElement('span');
+        badge.className = 'badge badge-blue';
+        badge.textContent = name;
+        list.appendChild(badge);
+    });
+}
+
+let extraHoursCount = 0;
+
+function addExtraHours() {
+    const container = document.getElementById('extraHoursContainer');
+    const row = document.createElement('div');
+    row.className = 'extra-hours-row';
+    row.innerHTML = `
+        <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px;">Date</label>
+            <input type="date" name="extra_hours_date" class="form-control">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px;">Hours</label>
+            <input type="number" name="extra_hours_amount" class="form-control" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px;">Company (Optional)</label>
+            <select name="extra_hours_company" class="form-control">
+                <option value="">-- Select --</option>
+                {% for company in companies %}
+                <option value="{{ company.id }}">{{ company.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px;">Description (Optional)</label>
+            <input type="text" name="extra_hours_description" class="form-control" placeholder="e.g., Deep Cleaning">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <span class="remove-btn" onclick="this.closest('.extra-hours-row').remove()" style="cursor: pointer; color: #ef4444; font-size: 20px;">×</span>
+        </div>
+    `;
+    container.appendChild(row);
+    extraHoursCount++;
+}
+
+// Don't add extra hours by default - let user add if needed
+</script>
+{% endblock %}

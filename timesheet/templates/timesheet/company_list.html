@@ -1,0 +1,94 @@
+
+{% extends 'timesheet/base.html' %}
+
+{% block title %}Companies - Timesheet Manager{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h2>Company Database</h2>
+            <p class="text-gray" style="font-size: 14px; margin-top: 4px;">
+                {{ active_count }} active | {{ inactive_count }} inactive | 
+                <a href="/admin/timesheet/company/" style="color: #3b82f6;">Also available in Django Admin →</a>
+            </p>
+        </div>
+        <a href="{% url 'company_add' %}" style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">+ Add New Company</a>  <!-- FIXED -->
+    </div>
+    
+    <div class="grid grid-cols-3">
+        {% for company in companies %}
+        <div class="company-card" style="position: relative;">
+            <div class="flex justify-between items-center mb-2">
+                <h3 style="font-size: 16px; font-weight: 600;">{{ company.name }}</h3>
+                <div class="flex gap-2">
+                    {% if not company.is_active %}
+                    <span class="badge" style="background: #fee2e2; color: #991b1b;">Inactive</span>
+                    {% endif %}
+                    <span class="pattern-badge pattern-{{ company.pattern_type }}">{{ company.get_pattern_type_display }}</span>
+                </div>
+            </div>
+            
+            {% if company.pattern_type == 'weekly' %}
+            <div class="hours-grid">
+                <div class="hours-cell {% if company.mon_hours > 0 %}has-hours{% endif %}">
+                    <div class="day-label">Mon</div>
+                    <div>{{ company.mon_hours|floatformat:2 }}</div>  <!-- FIXED -->
+                </div>
+                <div class="hours-cell {% if company.tue_hours > 0 %}has-hours{% endif %}">
+                    <div class="day-label">Tue</div>
+                    <div>{{ company.tue_hours|floatformat:2 }}</div>
+                </div>
+                <div class="hours-cell {% if company.wed_hours > 0 %}has-hours{% endif %}">
+                    <div class="day-label">Wed</div>
+                    <div>{{ company.wed_hours|floatformat:2 }}</div>
+                </div>
+                <div class="hours-cell {% if company.thu_hours > 0 %}has-hours{% endif %}">
+                    <div class="day-label">Thu</div>
+                    <div>{{ company.thu_hours|floatformat:2 }}</div>
+                </div>
+                <div class="hours-cell {% if company.fri_hours > 0 %}has-hours{% endif %}">
+                    <div class="day-label">Fri</div>
+                    <div>{{ company.fri_hours|floatformat:2 }}</div>
+                </div>
+                <div class="hours-cell {% if company.sat_hours > 0 %}has-hours{% endif %}">
+                    <div class="day-label">Sat</div>
+                    <div>{{ company.sat_hours|floatformat:2 }}</div>
+                </div>
+                <div class="hours-cell {% if company.sun_hours > 0 %}has-hours{% endif %}">
+                    <div class="day-label">Sun</div>
+                    <div>{{ company.sun_hours|floatformat:2 }}</div>
+                </div>
+            </div>
+            {% else %}
+            <div style="font-size: 12px; margin-top: 8px; background: #f9fafb; padding: 8px; border-radius: 6px;">
+                <div style="margin-bottom: 4px;"><strong>Week A:</strong> M:{{ company.mon_hours_week_a|floatformat:2 }} T:{{ company.tue_hours_week_a|floatformat:2 }} W:{{ company.wed_hours_week_a|floatformat:2 }} Th:{{ company.thu_hours_week_a|floatformat:2 }} F:{{ company.fri_hours_week_a|floatformat:2 }}</div>
+                <div><strong>Week B:</strong> M:{{ company.mon_hours_week_b|floatformat:2 }} T:{{ company.tue_hours_week_b|floatformat:2 }} W:{{ company.wed_hours_week_b|floatformat:2 }} Th:{{ company.thu_hours_week_b|floatformat:2 }} F:{{ company.fri_hours_week_b|floatformat:2 }}</div>
+            </div>
+            {% endif %}
+            
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; display: flex; gap: 8px;">
+                <a href="{% url 'company_detail' company.pk %}" class="btn btn-secondary" style="flex: 1; padding: 6px; font-size: 12px; justify-content: center;">View</a>
+                <a href="{% url 'company_edit' company.pk %}" style="flex: 1; padding: 6px; font-size: 12px; background: #f59e0b; color: white; text-decoration: none; border-radius: 6px; text-align: center; display: inline-flex; align-items: center; justify-content: center;">Edit</a>  <!-- FIXED -->
+                <a href="{% url 'company_delete' company.pk %}" style="flex: 1; padding: 6px; font-size: 12px; background: #ef4444; color: white; text-decoration: none; border-radius: 6px; text-align: center; display: inline-flex; align-items: center; justify-content: center;">Delete</a>  <!-- FIXED -->
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">
+            <p>No companies added yet.</p>
+            <a href="{% url 'company_add' %}" style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Add Your First Company</a>  <!-- FIXED -->
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card" style="background: #f0f9ff; border: 1px solid #bae6fd;">
+    <h3 style="margin-bottom: 12px; color: #0369a1;">💡 Managing Companies</h3>
+    <ul style="margin-left: 20px; color: #0c4a6e; line-height: 1.8;">
+        <li><strong>Add Company:</strong> Click "Add New Company" to create a company with weekly or bi-weekly schedule</li>
+        <li><strong>Edit:</strong> Click "Edit" to modify hours or switch between weekly/bi-weekly patterns</li>
+        <li><strong>Deactivate:</strong> Set "Is Active" to false to hide from timesheet creation (keeps history)</li>
+        <li><strong>Django Admin:</strong> Access <code>/admin/</code> for bulk operations and advanced filtering</li>
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+<!-- timesheet/templates/timesheet/company_confirm_delete.html (New) -->
+{% extends 'timesheet/base.html' %}
+
+{% block title %}Delete {{ company.name }} - Timesheet Manager{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2 class="mb-4" style="color: #dc2626;">⚠️ Delete Company?</h2>
+    
+    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <p style="color: #991b1b; margin-bottom: 8px;"><strong>You are about to delete:</strong></p>
+        <p style="font-size: 20px; color: #7f1d1d; font-weight: 600;">{{ company.name }}</p>
+        <p style="color: #991b1b; margin-top: 8px;">Pattern: {{ company.get_pattern_type_display }}</p>
+    </div>
+    
+    {% if timesheet_count > 0 %}
+    <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <p style="color: #92400e;"><strong>⚠️ Warning:</strong> This company is used in {{ timesheet_count }} timesheet(s).</p>
+        <p style="color: #92400e; font-size: 14px; margin-top: 8px;">Deleting this company will not delete existing timesheets, but the company name may show as "Deleted Company" in old records.</p>
+    </div>
+    {% endif %}
+    
+    <p class="mb-4">This action <strong>cannot be undone</strong>. Are you sure you want to proceed?</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'company_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">Yes, Delete Company</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

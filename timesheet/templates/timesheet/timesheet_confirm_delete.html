@@ -1,0 +1,18 @@
+<!-- timesheet/templates/timesheet/timesheet_confirm_delete.html -->
+{% extends 'timesheet/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <h2 class="mb-4" style="color: #dc2626;">Delete Timesheet?</h2>
+    <p class="mb-4">Are you sure you want to delete the timesheet for <strong>{{ timesheet.cleaner_name }}</strong> ({{ timesheet.month }}/{{ timesheet.year }})?</p>
+    <p class="text-gray mb-4">This action cannot be undone.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <a href="{% url 'timesheet_detail' timesheet.pk %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">Delete Timesheet</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

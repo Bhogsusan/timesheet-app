@@ -1,0 +1,49 @@
+
+{% extends 'timesheet/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div class="flex justify-between items-center mb-4">
+        <h2>All Timesheets</h2>
+        <a href="{% url 'create_timesheet' %}" style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">+ Create New Timesheet</a>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Cleaner Name</th>
+                <th>Period</th>
+                <th>Companies</th>
+                <th>Total Hours</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for timesheet in timesheets %}
+            <tr>
+                <td class="font-bold">{{ timesheet.cleaner_name }}</td>
+                <td>{{ timesheet.get_month_name }} {{ timesheet.year }}</td>  <!-- FIXED: Use month name -->
+                <td>
+                    {% for entry in timesheet.entries.all %}
+                        <span class="badge badge-blue">{{ entry.company.name }}</span>
+                    {% endfor %}
+                </td>
+                <td class="font-bold text-blue">{{ timesheet.get_total_hours }} hrs</td>
+                <td class="text-gray">{{ timesheet.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <a href="{% url 'timesheet_detail' timesheet.pk %}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">View</a>
+                    <a href="{% url 'generate_excel' timesheet.pk %}" class="btn btn-success" style="padding: 6px 12px; font-size: 12px;">Excel</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-gray" style="padding: 40px;">
+                    No timesheets yet. <a href="{% url 'create_timesheet' %}" style="color: #3b82f6;">Create one now</a>.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

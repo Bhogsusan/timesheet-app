@@ -1,0 +1,112 @@
+
+{% extends 'timesheet/base.html' %}
+
+{% block title %}{{ timesheet.cleaner_name }} - {{ timesheet.get_month_name }} {{ timesheet.year }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h2>{{ timesheet.cleaner_name }}</h2>
+            <p class="text-gray">{{ timesheet.get_month_name }} {{ timesheet.year }}</p>  <!-- FIXED -->
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'generate_excel' timesheet.pk %}" class="btn btn-success">📊 Download Excel</a>
+            <a href="{% url 'delete_timesheet' timesheet.pk %}" class="btn btn-danger">🗑 Delete</a>
+        </div>
+    </div>
+    
+    <!-- Companies -->
+    <div class="mb-4">
+        <h4 style="margin-bottom: 8px;">Companies:</h4>
+        {% for entry in entries %}
+        <span class="badge badge-blue" style="margin-right: 8px;">
+            {{ entry.company.name }} 
+            <small>({{ entry.company.get_pattern_type_display }})</small>
+        </span>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Preview Table -->
+<div class="card">
+    <h3 class="mb-4">Preview</h3>
+    <div style="overflow-x: auto;">
+        <table class="preview-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Day</th>
+                    {% for entry in entries %}
+                    <th>{{ entry.company.name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in calendar_data %}
+                <tr>
+                    <td>{{ row.date }}</td>
+                    <td>{{ row.day_name }}</td>
+                    {% for company_data in row.companies %}
+                    <td>{{ company_data.hours|floatformat:2 }}</td>  
+                    {% empty %}
+                    {% for entry in entries %}
+                    <td>-</td>
+                    {% endfor %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                
+                <!-- Total Row -->
+                <tr class="total-row">
+                    <td colspan="2" style="text-align: right;">TOTAL</td>
+                    {% for company, total in company_totals.items %}
+                    <td>{{ total|floatformat:2 }}</td>  
+                    {% endfor %}
+                </tr>
+                
+                <!-- Grand Total -->
+                <tr class="grand-total">
+                    <td colspan="2" style="text-align: right;">GRAND TOTAL</td>
+                    <td colspan="{{ entries|length }}">{{ grand_total|floatformat:2 }}</td>  
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Extra Hours -->
+{% if extra_hours %}
+<div class="card">
+    <h3 class="mb-4">Extra Hours</h3>
+    <table class="preview-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Hours</th>
+                <th>Description</th>
+                <th>Company</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eh in extra_hours %}
+            <tr>
+                <td>{{ eh.date|date:"M d" }}</td>
+                <td>{{ eh.date|date:"D" }}</td>
+                <td>{{ eh.hours|floatformat:2 }}</td> 
+                <td>{{ eh.description }}</td>
+                <td>{{ eh.company.name|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Stats -->
+<div class="stats-card">
+    <div>Grand Total Hours</div>
+    <div class="stats-number">{{ grand_total|floatformat:2 }}</div> 
+</div>
+{% endblock %}

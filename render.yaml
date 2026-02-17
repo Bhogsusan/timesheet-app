@@ -1,0 +1,16 @@
+# render.yaml
+services:
+  - type: web
+    name: timesheet-app
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn timesheet_project.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: WEB_CONCURRENCY
+        value: "4"

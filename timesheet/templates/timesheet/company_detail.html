@@ -1,0 +1,198 @@
+
+{% extends 'timesheet/base.html' %}
+
+{% block title %}{{ company.name }} - Company Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <h2>{{ company.name }}</h2>
+                <span class="pattern-badge pattern-{{ company.pattern_type }}">{{ company.get_pattern_type_display }}</span>
+                {% if not company.is_active %}
+                <span class="badge" style="background: #fee2e2; color: #991b1b;">Inactive</span>
+                {% endif %}
+            </div>
+            <p class="text-gray">Added on {{ company.created_at|date:"F d, Y" }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'company_list' %}" class="btn btn-secondary">← Back</a>
+            <a href="{% url 'company_edit' company.pk %}" style="background: #f59e0b; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">Edit</a>  <!-- FIXED -->
+            <a href="{% url 'company_delete' company.pk %}" style="background: #ef4444; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">Delete</a>  <!-- FIXED -->
+        </div>
+    </div>
+    
+    {% if company.pattern_type == 'biweekly' and company.biweekly_start_date %}
+    <div style="background: #eff6ff; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+        <strong>Bi-Weekly Cycle Start:</strong> {{ company.biweekly_start_date|date:"F d, Y" }}
+        <span style="color: #6b7280; margin-left: 8px;">(Week A begins on this date)</span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Schedule Display -->
+<div class="card">
+    <h3 class="mb-4">Schedule Details</h3>
+    
+    {% if company.pattern_type == 'weekly' %}
+    <div class="hours-section" style="background: white; padding: 0;">
+        <div class="hours-grid-form" style="gap: 16px;">
+            <div class="hours-input-group" style="padding: 16px; background: {% if company.mon_hours > 0 %}#dbeafe{% else %}#f3f4f6{% endif %}; border-radius: 8px;">
+                <label style="font-size: 14px; margin-bottom: 8px;">Monday</label>
+                <div style="font-size: 24px; font-weight: 700; color: {% if company.mon_hours > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.mon_hours|floatformat:2 }}</div>  <!-- FIXED -->
+                <div style="font-size: 12px; color: #6b7280;">hours</div>
+            </div>
+            <div class="hours-input-group" style="padding: 16px; background: {% if company.tue_hours > 0 %}#dbeafe{% else %}#f3f4f6{% endif %}; border-radius: 8px;">
+                <label style="font-size: 14px; margin-bottom: 8px;">Tuesday</label>
+                <div style="font-size: 24px; font-weight: 700; color: {% if company.tue_hours > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.tue_hours|floatformat:2 }}</div>
+                <div style="font-size: 12px; color: #6b7280;">hours</div>
+            </div>
+            <div class="hours-input-group" style="padding: 16px; background: {% if company.wed_hours > 0 %}#dbeafe{% else %}#f3f4f6{% endif %}; border-radius: 8px;">
+                <label style="font-size: 14px; margin-bottom: 8px;">Wednesday</label>
+                <div style="font-size: 24px; font-weight: 700; color: {% if company.wed_hours > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.wed_hours|floatformat:2 }}</div>
+                <div style="font-size: 12px; color: #6b7280;">hours</div>
+            </div>
+            <div class="hours-input-group" style="padding: 16px; background: {% if company.thu_hours > 0 %}#dbeafe{% else %}#f3f4f6{% endif %}; border-radius: 8px;">
+                <label style="font-size: 14px; margin-bottom: 8px;">Thursday</label>
+                <div style="font-size: 24px; font-weight: 700; color: {% if company.thu_hours > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.thu_hours|floatformat:2 }}</div>
+                <div style="font-size: 12px; color: #6b7280;">hours</div>
+            </div>
+            <div class="hours-input-group" style="padding: 16px; background: {% if company.fri_hours > 0 %}#dbeafe{% else %}#f3f4f6{% endif %}; border-radius: 8px;">
+                <label style="font-size: 14px; margin-bottom: 8px;">Friday</label>
+                <div style="font-size: 24px; font-weight: 700; color: {% if company.fri_hours > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.fri_hours|floatformat:2 }}</div>
+                <div style="font-size: 12px; color: #6b7280;">hours</div>
+            </div>
+            <div class="hours-input-group" style="padding: 16px; background: {% if company.sat_hours > 0 %}#dbeafe{% else %}#f3f4f6{% endif %}; border-radius: 8px;">
+                <label style="font-size: 14px; margin-bottom: 8px;">Saturday</label>
+                <div style="font-size: 24px; font-weight: 700; color: {% if company.sat_hours > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.sat_hours|floatformat:2 }}</div>
+                <div style="font-size: 12px; color: #6b7280;">hours</div>
+            </div>
+            <div class="hours-input-group" style="padding: 16px; background: {% if company.sun_hours > 0 %}#dbeafe{% else %}#f3f4f6{% endif %}; border-radius: 8px;">
+                <label style="font-size: 14px; margin-bottom: 8px;">Sunday</label>
+                <div style="font-size: 24px; font-weight: 700; color: {% if company.sun_hours > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.sun_hours|floatformat:2 }}</div>
+                <div style="font-size: 12px; color: #6b7280;">hours</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center;">
+            <span style="color: #166534; font-size: 14px;">Total Weekly Hours:</span>
+            <span style="color: #166534; font-size: 28px; font-weight: 700; margin-left: 8px;">{{ weekly_total|floatformat:2 }}</span>  <!-- FIXED -->
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Bi-Weekly Display -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Week A -->
+        <div style="background: #eff6ff; padding: 20px; border-radius: 12px; border: 2px solid #3b82f6;">
+            <h4 style="color: #1e40af; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <span style="background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">Week A</span>
+                First Week
+            </h4>
+            <div class="hours-grid-form" style="gap: 8px;">
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Mon</label>
+                    <div style="font-weight: 600; color: {% if company.mon_hours_week_a > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.mon_hours_week_a|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Tue</label>
+                    <div style="font-weight: 600; color: {% if company.tue_hours_week_a > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.tue_hours_week_a|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Wed</label>
+                    <div style="font-weight: 600; color: {% if company.wed_hours_week_a > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.wed_hours_week_a|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Thu</label>
+                    <div style="font-weight: 600; color: {% if company.thu_hours_week_a > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.thu_hours_week_a|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Fri</label>
+                    <div style="font-weight: 600; color: {% if company.fri_hours_week_a > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.fri_hours_week_a|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Sat</label>
+                    <div style="font-weight: 600; color: {% if company.sat_hours_week_a > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.sat_hours_week_a|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Sun</label>
+                    <div style="font-weight: 600; color: {% if company.sun_hours_week_a > 0 %}#1e40af{% else %}#9ca3af{% endif %};">{{ company.sun_hours_week_a|floatformat:2 }}</div>
+                </div>
+            </div>
+            <div style="margin-top: 12px; text-align: center; color: #1e40af; font-weight: 600;">
+                Total: {{ week_a_total|floatformat:2 }} hours  <!-- FIXED -->
+            </div>
+        </div>
+        
+        <!-- Week B -->
+        <div style="background: #fdf2f8; padding: 20px; border-radius: 12px; border: 2px solid #ec4899;">
+            <h4 style="color: #9d174d; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <span style="background: #ec4899; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">Week B</span>
+                Alternate Week
+            </h4>
+            <div class="hours-grid-form" style="gap: 8px;">
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Mon</label>
+                    <div style="font-weight: 600; color: {% if company.mon_hours_week_b > 0 %}#9d174d{% else %}#9ca3af{% endif %};">{{ company.mon_hours_week_b|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Tue</label>
+                    <div style="font-weight: 600; color: {% if company.tue_hours_week_b > 0 %}#9d174d{% else %}#9ca3af{% endif %};">{{ company.tue_hours_week_b|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Wed</label>
+                    <div style="font-weight: 600; color: {% if company.wed_hours_week_b > 0 %}#9d174d{% else %}#9ca3af{% endif %};">{{ company.wed_hours_week_b|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Thu</label>
+                    <div style="font-weight: 600; color: {% if company.thu_hours_week_b > 0 %}#9d174d{% else %}#9ca3af{% endif %};">{{ company.thu_hours_week_b|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Fri</label>
+                    <div style="font-weight: 600; color: {% if company.fri_hours_week_b > 0 %}#9d174d{% else %}#9ca3af{% endif %};">{{ company.fri_hours_week_b|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Sat</label>
+                    <div style="font-weight: 600; color: {% if company.sat_hours_week_b > 0 %}#9d174d{% else %}#9ca3af{% endif %};">{{ company.sat_hours_week_b|floatformat:2 }}</div>
+                </div>
+                <div class="hours-input-group">
+                    <label style="font-size: 11px;">Sun</label>
+                    <div style="font-weight: 600; color: {% if company.sun_hours_week_b > 0 %}#9d174d{% else %}#9ca3af{% endif %};">{{ company.sun_hours_week_b|floatformat:2 }}</div>
+                </div>
+            </div>
+            <div style="margin-top: 12px; text-align: center; color: #9d174d; font-weight: 600;">
+                Total: {{ week_b_total|floatformat:2 }} hours  <!-- FIXED -->
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Usage Stats -->
+<div class="card" style="background: #f0f9ff;">
+    <h3 class="mb-4">Usage Statistics</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+        <div>
+            <div style="font-size: 32px; font-weight: 700; color: #0369a1;">{{ timesheet_count }}</div>
+            <div style="color: #0c4a6e; font-size: 14px;">Timesheets Used In</div>
+        </div>
+        <div>
+            <div style="font-size: 32px; font-weight: 700; color: #0369a1;">
+                {% if company.pattern_type == 'weekly' %}
+                    {{ weekly_total|floatformat:2 }}
+                {% else %}
+                    {{ week_a_total|add:week_b_total|floatformat:2 }}
+                {% endif %}
+            </div>
+            <div style="color: #0c4a6e; font-size: 14px;">Avg Hours Per 2 Weeks</div>
+        </div>
+        <div>
+            <div style="font-size: 32px; font-weight: 700; color: #0369a1;">
+                {% if company.is_active %}✓{% else %}✗{% endif %}
+            </div>
+            <div style="color: #0c4a6e; font-size: 14px;">Status</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
