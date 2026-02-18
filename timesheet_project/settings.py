@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-9@(*l3c=r7ijcya43jy%kaq46fuis91@$!g2y($v&a8re0_*^#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['timesheet-app-y708.onrender.com','127.0.0.1']
+ALLOWED_HOSTS = ['timesheet-app-zeo0.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
