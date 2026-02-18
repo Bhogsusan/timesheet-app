@@ -1,0 +1,11 @@
+# .gitignore
+*.pyc
+__pycache__
+db.sqlite3
+.env
+.venv
+*.log
+
+# Don't ignore staticfiles directory itself, but ignore its contents
+staticfiles/*
+!staticfiles/.gitkeep
